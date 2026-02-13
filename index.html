@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตารางเรียนเทคโนโลยีคอมพิวเตอร์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .day-Mon { border-left: 8px solid #fbbf24; }
+        .day-Tue { border-left: 8px solid #f472b6; }
+        .day-Wed { border-left: 8px solid #34d399; }
+        .day-Thu { border-left: 8px solid #fb923c; }
+        .day-Fri { border-left: 8px solid #60a5fa; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">ตารางเรียนนักศึกษา</h1>
+            <p class="text-gray-600">สาขาเทคโนโลยีคอมพิวเตอร์ (IT)</p>
+        </header>
+
+        <div class="mb-6 flex flex-wrap gap-4 justify-center">
+            <select id="dayFilter" class="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="all">แสดงทุกวัน</option>
+                <option value="Mon">วันจันทร์</option>
+                <option value="Tue">วันอังคาร</option>
+                <option value="Wed">วันพุธ</option>
+                <option value="Thu">วันพฤหัสบดี</option>
+                <option value="Fri">วันศุกร์</option>
+            </select>
+        </div>
+
+        <div id="scheduleContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            </div>
+    </div>
+
+    <script>
+        // ข้อมูล JSON จากที่คุณให้มา
+        const jsonData = {
+    "status": "success",
+    "data": [
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30001-1001",
+            "subject_name": "การเป็นผู้ประกอบการ",
+            "teacher_name": "ครูปรารถนา",
+            "room_name": "??????",
+            "day": "Fri",
+            "period": 1
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6405",
+            "day": "Fri",
+            "period": 1
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6403",
+            "day": "Fri",
+            "period": 1
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2106",
+            "subject_name": "งานบริการคอมพิวเตอร์และเทคโนโลยีสารสนเทศ",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6201",
+            "day": "Fri",
+            "period": 1
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20001-1003",
+            "subject_name": "ธุรกิจและการเป็นผู้ประกอบการ",
+            "teacher_name": "ครูทิวารัตน์",
+            "room_name": "6203",
+            "day": "Fri",
+            "period": 1
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2010",
+            "subject_name": "การสร้างภาพเคลื่อนไหวเบื้องต้น",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6303",
+            "day": "Fri",
+            "period": 1
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30000-1501",
+            "subject_name": "สังคมไทยในยุคดิจิทัล",
+            "teacher_name": "ครูศิริพร",
+            "room_name": "6204",
+            "day": "Fri",
+            "period": 2
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "6404",
+            "day": "Fri",
+            "period": 2
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6303",
+            "day": "Fri",
+            "period": 3
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6204",
+            "day": "Fri",
+            "period": 3
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0001",
+            "subject_name": "การสร้างเว็บไซต์",
+            "teacher_name": "ครูบังอร",
+            "room_name": "5306",
+            "day": "Fri",
+            "period": 3
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2011",
+            "subject_name": "การพัฒนาแอปพลิเคชันบนอุปกรณืเคลื่อนที่",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "5204",
+            "day": "Fri",
+            "period": 3
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2107",
+            "subject_name": "ปฎิสัมพันธ์ระหว่างมนุษย์กับคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6201",
+            "day": "Fri",
+            "period": 4
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6205",
+            "day": "Fri",
+            "period": 6
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "5306",
+            "day": "Fri",
+            "period": 6
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "5402",
+            "day": "Fri",
+            "period": 6
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2106",
+            "subject_name": "งานบริการคอมพิวเตอร์และเทคโนโลยีสารสนเทศ",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6403",
+            "day": "Fri",
+            "period": 6
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2408",
+            "subject_name": "ปฎิบัตืงานพัฒนาระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "??????",
+            "day": "Fri",
+            "period": 6
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6403",
+            "day": "Fri",
+            "period": 7
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "10401",
+            "day": "Fri",
+            "period": 7
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6303",
+            "day": "Fri",
+            "period": 7
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2012",
+            "subject_name": "การพัฒนาระบบกันด้วยแพลตฟอร์ม",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6405",
+            "day": "Fri",
+            "period": 7
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30001-1001",
+            "subject_name": "การเป็นผู้ประกอบการ",
+            "teacher_name": "ครูปรารถนา",
+            "room_name": "6201",
+            "day": "Fri",
+            "period": 8
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "5204",
+            "day": "Fri",
+            "period": 8
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6204",
+            "day": "Fri",
+            "period": 8
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6402",
+            "day": "Fri",
+            "period": 8
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6405",
+            "day": "Fri",
+            "period": 9
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6301",
+            "day": "Fri",
+            "period": 9
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6302",
+            "day": "Fri",
+            "period": 9
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2406",
+            "subject_name": "วิทยาการก้าวหน้าระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6404",
+            "day": "Fri",
+            "period": 9
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2012",
+            "subject_name": "การพัฒนาระบบกันด้วยแพลตฟอร์ม",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6303",
+            "day": "Fri",
+            "period": 9
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30000-1501",
+            "subject_name": "สังคมไทยในยุคดิจิทัล",
+            "teacher_name": "ครูศิริพร",
+            "room_name": "6303",
+            "day": "Fri",
+            "period": 10
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30001-1001",
+            "subject_name": "การเป็นผู้ประกอบการ",
+            "teacher_name": "ครูปรารถนา",
+            "room_name": "6403",
+            "day": "Fri",
+            "period": 10
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6302",
+            "day": "Fri",
+            "period": 10
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6204",
+            "day": "Fri",
+            "period": 10
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2406",
+            "subject_name": "วิทยาการก้าวหน้าระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6205",
+            "day": "Fri",
+            "period": 10
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2017",
+            "subject_name": "เทคโนโลยีการนำเข้าข้อมูลเข้าสู่ระบบคอมพิวเตอร์",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6301",
+            "day": "Fri",
+            "period": 10
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6204",
+            "day": "Fri",
+            "period": 11
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30001-1003",
+            "subject_name": "การประยุกต์ใช้เทคโนโลยีดิจิทัลในอาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "??????",
+            "day": "Fri",
+            "period": 11
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "6404",
+            "day": "Fri",
+            "period": 11
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2107",
+            "subject_name": "ปฎิสัมพันธ์ระหว่างมนุษย์กับคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6302",
+            "day": "Fri",
+            "period": 11
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2010",
+            "subject_name": "การสร้างภาพเคลื่อนไหวเบื้องต้น",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6201",
+            "day": "Fri",
+            "period": 11
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6302",
+            "day": "Fri",
+            "period": 12
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "??????",
+            "day": "Fri",
+            "period": 12
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6301",
+            "day": "Fri",
+            "period": 12
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6303",
+            "day": "Fri",
+            "period": 12
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20001-1003",
+            "subject_name": "ธุรกิจและการเป็นผู้ประกอบการ",
+            "teacher_name": "ครูทิวารัตน์",
+            "room_name": "6203",
+            "day": "Fri",
+            "period": 12
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6404",
+            "day": "Mon",
+            "period": 1
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6302",
+            "day": "Mon",
+            "period": 1
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5201",
+            "day": "Mon",
+            "period": 1
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "??????",
+            "day": "Mon",
+            "period": 1
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2107",
+            "subject_name": "ปฎิสัมพันธ์ระหว่างมนุษย์กับคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6405",
+            "day": "Mon",
+            "period": 1
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6302",
+            "day": "Mon",
+            "period": 2
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "5306",
+            "day": "Mon",
+            "period": 2
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5402",
+            "day": "Mon",
+            "period": 2
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-1001",
+            "subject_name": "กฎหมายในงานอาชีพอุตสาหกรรมดิจืทัล",
+            "teacher_name": "ครูบังอร",
+            "room_name": "5201",
+            "day": "Mon",
+            "period": 2
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20000-1208",
+            "subject_name": "ภาษอังกฤษเพื่อความพร้อม",
+            "teacher_name": "ครูนัยนา",
+            "room_name": "6201",
+            "day": "Mon",
+            "period": 2
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30001-1001",
+            "subject_name": "การเป็นผู้ประกอบการ",
+            "teacher_name": "ครูปรารถนา",
+            "room_name": "6204",
+            "day": "Mon",
+            "period": 3
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "5201",
+            "day": "Mon",
+            "period": 3
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6301",
+            "day": "Mon",
+            "period": 3
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0001",
+            "subject_name": "การสร้างเว็บไซต์",
+            "teacher_name": "ครูบังอร",
+            "room_name": "5306",
+            "day": "Mon",
+            "period": 3
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2007",
+            "subject_name": "ระบบเครือข่ายโทรศัพท์เคลื่อนที่",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "5402",
+            "day": "Mon",
+            "period": 3
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20001-1003",
+            "subject_name": "ธุรกิจและการเป็นผู้ประกอบการ",
+            "teacher_name": "ครูทิวารัตน์",
+            "room_name": "6403",
+            "day": "Mon",
+            "period": 3
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6201",
+            "day": "Mon",
+            "period": 4
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30001-1001",
+            "subject_name": "การเป็นผู้ประกอบการ",
+            "teacher_name": "ครูปรารถนา",
+            "room_name": "6203",
+            "day": "Mon",
+            "period": 4
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "5204",
+            "day": "Mon",
+            "period": 4
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "5201",
+            "day": "Mon",
+            "period": 4
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-8503",
+            "subject_name": "โครงงาน 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6402",
+            "day": "Mon",
+            "period": 4
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2011",
+            "subject_name": "การพัฒนาแอปพลิเคชันบนอุปกรณืเคลื่อนที่",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6303",
+            "day": "Mon",
+            "period": 4
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2010",
+            "subject_name": "การพัฒนาอุปกรณ์เคลื่อนที่",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6201",
+            "day": "Mon",
+            "period": 6
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6303",
+            "day": "Mon",
+            "period": 6
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "6204",
+            "day": "Mon",
+            "period": 6
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5201",
+            "day": "Mon",
+            "period": 6
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-9203",
+            "subject_name": "การอินเทอร์เฟสในระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6203",
+            "day": "Mon",
+            "period": 6
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2010",
+            "subject_name": "การพัฒนาอุปกรณ์เคลื่อนที่",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6303",
+            "day": "Mon",
+            "period": 7
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6204",
+            "day": "Mon",
+            "period": 7
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5201",
+            "day": "Mon",
+            "period": 7
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0004",
+            "subject_name": "ระบบเครือข่ายคอมพิวเตอร์",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6302",
+            "day": "Mon",
+            "period": 7
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6302",
+            "day": "Mon",
+            "period": 8
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6205",
+            "day": "Mon",
+            "period": 8
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5402",
+            "day": "Mon",
+            "period": 8
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "5406",
+            "day": "Mon",
+            "period": 8
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20000-1208",
+            "subject_name": "ภาษอังกฤษเพื่อความพร้อม",
+            "teacher_name": "ครูนัยนา",
+            "room_name": "6405",
+            "day": "Mon",
+            "period": 8
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6205",
+            "day": "Mon",
+            "period": 9
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6403",
+            "day": "Mon",
+            "period": 9
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6405",
+            "day": "Mon",
+            "period": 9
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "6402",
+            "day": "Mon",
+            "period": 9
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2407",
+            "subject_name": "ปัญหาพิเศษซอฟต์แวร์ระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6302",
+            "day": "Mon",
+            "period": 9
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6204",
+            "day": "Mon",
+            "period": 10
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6301",
+            "day": "Mon",
+            "period": 10
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30001-1003",
+            "subject_name": "การประยุกต์ใช้เทคโนโลยีดิจิทัลในอาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6203",
+            "day": "Mon",
+            "period": 10
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0004",
+            "subject_name": "ระบบเครือข่ายคอมพิวเตอร์",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6402",
+            "day": "Mon",
+            "period": 10
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2408",
+            "subject_name": "ปฎิบัตืงานพัฒนาระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6405",
+            "day": "Mon",
+            "period": 10
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2011",
+            "subject_name": "การพัฒนาแอปพลิเคชันบนอุปกรณืเคลื่อนที่",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6404",
+            "day": "Mon",
+            "period": 10
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30001-1001",
+            "subject_name": "การเป็นผู้ประกอบการ",
+            "teacher_name": "ครูปรารถนา",
+            "room_name": "??????",
+            "day": "Mon",
+            "period": 11
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "5306",
+            "day": "Mon",
+            "period": 11
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "5204",
+            "day": "Mon",
+            "period": 11
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6301",
+            "day": "Mon",
+            "period": 11
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6405",
+            "day": "Mon",
+            "period": 12
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6403",
+            "day": "Mon",
+            "period": 12
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30001-1003",
+            "subject_name": "การประยุกต์ใช้เทคโนโลยีดิจิทัลในอาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6201",
+            "day": "Mon",
+            "period": 12
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20001-1003",
+            "subject_name": "ธุรกิจและการเป็นผู้ประกอบการ",
+            "teacher_name": "ครูทิวารัตน์",
+            "room_name": "6203",
+            "day": "Mon",
+            "period": 12
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21900-1004",
+            "subject_name": "หลักการวิเคราะห์และออกแบบระบบเชิงวัตถุ",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "5306",
+            "day": "Mon",
+            "period": 12
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2010",
+            "subject_name": "การพัฒนาอุปกรณ์เคลื่อนที่",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6302",
+            "day": "Thu",
+            "period": 1
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "??????",
+            "day": "Thu",
+            "period": 1
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6203",
+            "day": "Thu",
+            "period": 1
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0001",
+            "subject_name": "การสร้างเว็บไซต์",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6303",
+            "day": "Thu",
+            "period": 1
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2408",
+            "subject_name": "ปฎิบัตืงานพัฒนาระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6301",
+            "day": "Thu",
+            "period": 1
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6203",
+            "day": "Thu",
+            "period": 2
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30001-1003",
+            "subject_name": "การประยุกต์ใช้เทคโนโลยีดิจิทัลในอาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6205",
+            "day": "Thu",
+            "period": 2
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2009",
+            "subject_name": "การประยุกต์ใช้งานระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6302",
+            "day": "Thu",
+            "period": 2
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6402",
+            "day": "Thu",
+            "period": 3
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6205",
+            "day": "Thu",
+            "period": 3
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6405",
+            "day": "Thu",
+            "period": 3
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-1002",
+            "subject_name": "การจัดการข้อมูลขนาดใหญ่เบื้องต้น",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "5306",
+            "day": "Thu",
+            "period": 3
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5105",
+            "day": "Thu",
+            "period": 4
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6302",
+            "day": "Thu",
+            "period": 4
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2007",
+            "subject_name": "ระบบเครือข่ายโทรศัพท์เคลื่อนที่",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "5401",
+            "day": "Thu",
+            "period": 4
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2011",
+            "subject_name": "การพัฒนาแอปพลิเคชันบนอุปกรณืเคลื่อนที่",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6405",
+            "day": "Thu",
+            "period": 4
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "??????",
+            "day": "Thu",
+            "period": 6
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "6205",
+            "day": "Thu",
+            "period": 6
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30001-1001",
+            "subject_name": "การเป็นผู้ประกอบการ",
+            "teacher_name": "ครูปรารถนา",
+            "room_name": "6203",
+            "day": "Thu",
+            "period": 7
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6403",
+            "day": "Thu",
+            "period": 7
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6301",
+            "day": "Thu",
+            "period": 7
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2011",
+            "subject_name": "การพัฒนาแอปพลิเคชันบนอุปกรณืเคลื่อนที่",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6402",
+            "day": "Thu",
+            "period": 7
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30000-1501",
+            "subject_name": "สังคมไทยในยุคดิจิทัล",
+            "teacher_name": "ครูศิริพร",
+            "room_name": "5306",
+            "day": "Thu",
+            "period": 8
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "10401",
+            "day": "Thu",
+            "period": 8
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30001-1003",
+            "subject_name": "การประยุกต์ใช้เทคโนโลยีดิจิทัลในอาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6404",
+            "day": "Thu",
+            "period": 8
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2106",
+            "subject_name": "งานบริการคอมพิวเตอร์และเทคโนโลยีสารสนเทศ",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "??????",
+            "day": "Thu",
+            "period": 8
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-9203",
+            "subject_name": "การอินเทอร์เฟสในระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6302",
+            "day": "Thu",
+            "period": 8
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2010",
+            "subject_name": "การสร้างภาพเคลื่อนไหวเบื้องต้น",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6405",
+            "day": "Thu",
+            "period": 8
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6201",
+            "day": "Thu",
+            "period": 9
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6301",
+            "day": "Thu",
+            "period": 9
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6204",
+            "day": "Thu",
+            "period": 10
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6301",
+            "day": "Thu",
+            "period": 10
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2406",
+            "subject_name": "วิทยาการก้าวหน้าระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "5204",
+            "day": "Thu",
+            "period": 10
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2017",
+            "subject_name": "เทคโนโลยีการนำเข้าข้อมูลเข้าสู่ระบบคอมพิวเตอร์",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "??????",
+            "day": "Thu",
+            "period": 10
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30000-1202",
+            "subject_name": "การเขียนและการนำเสนอโครงงานภาษาอังกฤษ",
+            "teacher_name": "ครูเบญญาภา",
+            "room_name": "6403",
+            "day": "Thu",
+            "period": 11
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6303",
+            "day": "Thu",
+            "period": 11
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6404",
+            "day": "Thu",
+            "period": 11
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6204",
+            "day": "Thu",
+            "period": 11
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2407",
+            "subject_name": "ปัญหาพิเศษซอฟต์แวร์ระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6302",
+            "day": "Thu",
+            "period": 11
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6204",
+            "day": "Thu",
+            "period": 12
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "5204",
+            "day": "Thu",
+            "period": 12
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-9203",
+            "subject_name": "การอินเทอร์เฟสในระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "5306",
+            "day": "Thu",
+            "period": 12
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "5204",
+            "day": "Tue",
+            "period": 1
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6403",
+            "day": "Tue",
+            "period": 1
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5406",
+            "day": "Tue",
+            "period": 1
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2408",
+            "subject_name": "ปฎิบัตืงานพัฒนาระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6302",
+            "day": "Tue",
+            "period": 1
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30000-1202",
+            "subject_name": "การเขียนและการนำเสนอโครงงานภาษาอังกฤษ",
+            "teacher_name": "ครูเบญญาภา",
+            "room_name": "??????",
+            "day": "Tue",
+            "period": 2
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "5306",
+            "day": "Tue",
+            "period": 2
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "5402",
+            "day": "Tue",
+            "period": 2
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0004",
+            "subject_name": "ระบบเครือข่ายคอมพิวเตอร์",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "5204",
+            "day": "Tue",
+            "period": 2
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6205",
+            "day": "Tue",
+            "period": 3
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5201",
+            "day": "Tue",
+            "period": 3
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-1002",
+            "subject_name": "การจัดการข้อมูลขนาดใหญ่เบื้องต้น",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6405",
+            "day": "Tue",
+            "period": 3
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20000-1402",
+            "subject_name": "คณิตศาสตร์อุตสาหกรรม",
+            "teacher_name": "ครูพัฒนา",
+            "room_name": "5401",
+            "day": "Tue",
+            "period": 3
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21900-1004",
+            "subject_name": "หลักการวิเคราะห์และออกแบบระบบเชิงวัตถุ",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "??????",
+            "day": "Tue",
+            "period": 3
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6402",
+            "day": "Tue",
+            "period": 4
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30001-1003",
+            "subject_name": "การประยุกต์ใช้เทคโนโลยีดิจิทัลในอาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "??????",
+            "day": "Tue",
+            "period": 4
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "10401",
+            "day": "Tue",
+            "period": 4
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6405",
+            "day": "Tue",
+            "period": 4
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21900-1004",
+            "subject_name": "หลักการวิเคราะห์และออกแบบระบบเชิงวัตถุ",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6302",
+            "day": "Tue",
+            "period": 4
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2010",
+            "subject_name": "การพัฒนาอุปกรณ์เคลื่อนที่",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6302",
+            "day": "Tue",
+            "period": 6
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6201",
+            "day": "Tue",
+            "period": 6
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30000-1404",
+            "subject_name": "แคลคูลัส 1",
+            "teacher_name": "ครูนรังสวรรค์",
+            "room_name": "5101",
+            "day": "Tue",
+            "period": 6
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6404",
+            "day": "Tue",
+            "period": 7
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "??????",
+            "day": "Tue",
+            "period": 7
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6302",
+            "day": "Tue",
+            "period": 7
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20000-1402",
+            "subject_name": "คณิตศาสตร์อุตสาหกรรม",
+            "teacher_name": "ครูพัฒนา",
+            "room_name": "5101",
+            "day": "Tue",
+            "period": 7
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6201",
+            "day": "Tue",
+            "period": 8
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30001-1002",
+            "subject_name": "องค์การและการบริหารงานคุณภาพ",
+            "teacher_name": "ครูคารม",
+            "room_name": "10401",
+            "day": "Tue",
+            "period": 8
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2012",
+            "subject_name": "การพัฒนาระบบกันด้วยแพลตฟอร์ม",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6303",
+            "day": "Tue",
+            "period": 8
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2013",
+            "subject_name": "การประยุกต์ใช้ระบบไอโอทีในชีวิตประจำวัน",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6405",
+            "day": "Tue",
+            "period": 9
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6404",
+            "day": "Tue",
+            "period": 9
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6303",
+            "day": "Tue",
+            "period": 9
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0001",
+            "subject_name": "การสร้างเว็บไซต์",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6204",
+            "day": "Tue",
+            "period": 9
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6404",
+            "day": "Tue",
+            "period": 10
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2007",
+            "subject_name": "เทคโนโลยีการจัดการฐานข้อมูล",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6302",
+            "day": "Tue",
+            "period": 10
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6205",
+            "day": "Tue",
+            "period": 10
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-8503",
+            "subject_name": "โครงงาน 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "5204",
+            "day": "Tue",
+            "period": 10
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6405",
+            "day": "Tue",
+            "period": 11
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30000-1501",
+            "subject_name": "สังคมไทยในยุคดิจิทัล",
+            "teacher_name": "ครูศิริพร",
+            "room_name": "5204",
+            "day": "Tue",
+            "period": 11
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6404",
+            "day": "Tue",
+            "period": 11
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2009",
+            "subject_name": "การประยุกต์ใช้งานระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6201",
+            "day": "Tue",
+            "period": 11
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2010",
+            "subject_name": "การสร้างภาพเคลื่อนไหวเบื้องต้น",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6303",
+            "day": "Tue",
+            "period": 11
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30000-1202",
+            "subject_name": "การเขียนและการนำเสนอโครงงานภาษาอังกฤษ",
+            "teacher_name": "ครูเบญญาภา",
+            "room_name": "6205",
+            "day": "Tue",
+            "period": 12
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6404",
+            "day": "Tue",
+            "period": 12
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0004",
+            "subject_name": "ระบบเครือข่ายคอมพิวเตอร์",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6403",
+            "day": "Tue",
+            "period": 12
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2407",
+            "subject_name": "ปัญหาพิเศษซอฟต์แวร์ระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6301",
+            "day": "Tue",
+            "period": 12
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2017",
+            "subject_name": "เทคโนโลยีการนำเข้าข้อมูลเข้าสู่ระบบคอมพิวเตอร์",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6204",
+            "day": "Tue",
+            "period": 12
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2010",
+            "subject_name": "การพัฒนาอุปกรณ์เคลื่อนที่",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6402",
+            "day": "Wed",
+            "period": 1
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2106",
+            "subject_name": "งานบริการคอมพิวเตอร์และเทคโนโลยีสารสนเทศ",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6204",
+            "day": "Wed",
+            "period": 1
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30000-1202",
+            "subject_name": "การเขียนและการนำเสนอโครงงานภาษาอังกฤษ",
+            "teacher_name": "ครูเบญญาภา",
+            "room_name": "6402",
+            "day": "Wed",
+            "period": 2
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6405",
+            "day": "Wed",
+            "period": 2
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6403",
+            "day": "Wed",
+            "period": 2
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "6204",
+            "day": "Wed",
+            "period": 2
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30000-1501",
+            "subject_name": "สังคมไทยในยุคดิจิทัล",
+            "teacher_name": "ครูศิริพร",
+            "room_name": "??????",
+            "day": "Wed",
+            "period": 3
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20001-1003",
+            "subject_name": "ธุรกิจและการเป็นผู้ประกอบการ",
+            "teacher_name": "ครูทิวารัตน์",
+            "room_name": "6205",
+            "day": "Wed",
+            "period": 3
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2407",
+            "subject_name": "ปัญหาพิเศษซอฟต์แวร์ระบบสมองกลฝังตัวและไอโอที",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6203",
+            "day": "Wed",
+            "period": 3
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2002",
+            "subject_name": "ระบบปฏิบัติการเครื่องแม่ข่าย",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6402",
+            "day": "Wed",
+            "period": 4
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6403",
+            "day": "Wed",
+            "period": 4
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30001-1003",
+            "subject_name": "การประยุกต์ใช้เทคโนโลยีดิจิทัลในอาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6204",
+            "day": "Wed",
+            "period": 4
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-1002",
+            "subject_name": "การจัดการข้อมูลขนาดใหญ่เบื้องต้น",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6201",
+            "day": "Wed",
+            "period": 4
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20001-1003",
+            "subject_name": "ธุรกิจและการเป็นผู้ประกอบการ",
+            "teacher_name": "ครูทิวารัตน์",
+            "room_name": "6301",
+            "day": "Wed",
+            "period": 4
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30000-1501",
+            "subject_name": "สังคมไทยในยุคดิจิทัล",
+            "teacher_name": "ครูศิริพร",
+            "room_name": "6205",
+            "day": "Wed",
+            "period": 6
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30000-1201",
+            "subject_name": "ภาษอังกฤษสำหรับงานอาชีพ",
+            "teacher_name": "ครูปานจันทร์",
+            "room_name": "6203",
+            "day": "Wed",
+            "period": 6
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6303",
+            "day": "Wed",
+            "period": 7
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2012",
+            "subject_name": "การวิเคราะห์และการนำเสนอข้อมูล",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6403",
+            "day": "Wed",
+            "period": 7
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-8503",
+            "subject_name": "โครงงาน 2",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "??????",
+            "day": "Wed",
+            "period": 7
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-8503",
+            "subject_name": "โครงงาน 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6204",
+            "day": "Wed",
+            "period": 7
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30000-2004",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "??????",
+            "day": "Wed",
+            "period": 8
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30000-2004",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "5204",
+            "day": "Wed",
+            "period": 8
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30000-2002",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ 1",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6205",
+            "day": "Wed",
+            "period": 8
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30000-2002",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ 1",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6301",
+            "day": "Wed",
+            "period": 8
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30000-2002",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ 1",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6405",
+            "day": "Wed",
+            "period": 8
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20000-2007",
+            "subject_name": "กิจกรรมส่งเสริมคึณธรรม จริยธรรม",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6204",
+            "day": "Wed",
+            "period": 8
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30000-2004",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6203",
+            "day": "Wed",
+            "period": 9
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "30000-2004",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6402",
+            "day": "Wed",
+            "period": 9
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30000-2002",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ 1",
+            "teacher_name": "ครูสุวนันท์",
+            "room_name": "6403",
+            "day": "Wed",
+            "period": 9
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "30000-2002",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ 1",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6201",
+            "day": "Wed",
+            "period": 9
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "30000-2002",
+            "subject_name": "กิจกรรมองค์การวิชาชีพ 1",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "5204",
+            "day": "Wed",
+            "period": 9
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20000-2007",
+            "subject_name": "กิจกรรมส่งเสริมคึณธรรม จริยธรรม",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "5306",
+            "day": "Wed",
+            "period": 9
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2017",
+            "subject_name": "โครงงานด้านเทคโนโลยีสารสนเทศ 2",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6403",
+            "day": "Wed",
+            "period": 10
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "??????",
+            "day": "Wed",
+            "period": 10
+        },
+        {
+            "group_id": "G4",
+            "group_name": "ปวส1/2-IT-Normal",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "6201",
+            "day": "Wed",
+            "period": 10
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0004",
+            "subject_name": "ระบบเครือข่ายคอมพิวเตอร์",
+            "teacher_name": "ครูประจิตร์",
+            "room_name": "6303",
+            "day": "Wed",
+            "period": 10
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "30001-1001",
+            "subject_name": "การเป็นผู้ประกอบการ",
+            "teacher_name": "ครูปรารถนา",
+            "room_name": "5306",
+            "day": "Wed",
+            "period": 11
+        },
+        {
+            "group_id": "G3",
+            "group_name": "ปวส1/3-IT-Normal",
+            "subject_id": "30001-1003",
+            "subject_name": "การประยุกต์ใช้เทคโนโลยีดิจิทัลในอาชีพ",
+            "teacher_name": "ครูบังอร",
+            "room_name": "6201",
+            "day": "Wed",
+            "period": 11
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31901-2005",
+            "subject_name": "การพัฒนาซอฟต์แวร์ด้วยเทคโนโลยี Back-end",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6302",
+            "day": "Wed",
+            "period": 11
+        },
+        {
+            "group_id": "G6",
+            "group_name": "ปวช3/3-IT-Dual System",
+            "subject_id": "20901-2009",
+            "subject_name": "การประยุกต์ใช้งานระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูกรรัก",
+            "room_name": "5204",
+            "day": "Wed",
+            "period": 11
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2408",
+            "subject_name": "ปฎิบัตืงานพัฒนาระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6402",
+            "day": "Wed",
+            "period": 11
+        },
+        {
+            "group_id": "G8",
+            "group_name": "ปวช2/3-IT-Dual System",
+            "subject_id": "21901-2010",
+            "subject_name": "การสร้างภาพเคลื่อนไหวเบื้องต้น",
+            "teacher_name": "ครูสวรินทร์",
+            "room_name": "6204",
+            "day": "Wed",
+            "period": 11
+        },
+        {
+            "group_id": "G1",
+            "group_name": "ปวส2/1-IT-M6",
+            "subject_id": "31901-2009",
+            "subject_name": "การพัฒนาไฮบริดแอปพลิเคชัน",
+            "teacher_name": "ครูนิราชัน",
+            "room_name": "6405",
+            "day": "Wed",
+            "period": 12
+        },
+        {
+            "group_id": "G2",
+            "group_name": "ปวส2/2-IT-Normal",
+            "subject_id": "31901-2006",
+            "subject_name": "การพัฒนาซอฟต์แวร์เชิงวัตถุ",
+            "teacher_name": "ครูพิชญะ",
+            "room_name": "6201",
+            "day": "Wed",
+            "period": 12
+        },
+        {
+            "group_id": "G5",
+            "group_name": "ปวส1/1-IT-M6",
+            "subject_id": "31900-0001",
+            "subject_name": "การสร้างเว็บไซต์",
+            "teacher_name": "ครูบังอร",
+            "room_name": "??????",
+            "day": "Wed",
+            "period": 12
+        },
+        {
+            "group_id": "G7",
+            "group_name": "ปวช3/1-IT-Normal",
+            "subject_id": "20901-2408",
+            "subject_name": "ปฎิบัตืงานพัฒนาระบบควบคุมด้วยคอมพิวเตอร์",
+            "teacher_name": "ครูพุทธคุณ",
+            "room_name": "6203",
+            "day": "Wed",
+            "period": 12
+        }
+    ]
+}
+
+        // ฟังก์ชันสำหรับจัดเรียงข้อมูลตามวันและคาบเรียน
+        const daysOrder = { "Mon": 1, "Tue": 2, "Wed": 3, "Thu": 4, "Fri": 5 };
+        const sortedData = [...jsonData.data].sort((a, b) => {
+            if (daysOrder[a.day] !== daysOrder[b.day]) {
+                return daysOrder[a.day] - daysOrder[b.day];
+            }
+            return a.period - b.period;
+        });
+
+        const container = document.getElementById('scheduleContainer');
+        const dayFilter = document.getElementById('dayFilter');
+
+        function renderSchedule(filter = 'all') {
+            container.innerHTML = '';
+            
+            const filteredData = filter === 'all' 
+                ? sortedData 
+                : sortedData.filter(item => item.day === filter);
+
+            if (filteredData.length === 0) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-500">ไม่พบข้อมูลการเรียน</p>';
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `bg-white p-5 rounded-xl shadow-md day-${item.day} hover:shadow-lg transition-shadow`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-sm font-semibold px-2 py-1 bg-gray-100 rounded text-gray-600">คาบที่ ${item.period}</span>
+                        <span class="text-sm text-blue-600 font-bold">${item.day}</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-1">${item.subject_name}</h3>
+                    <p class="text-sm text-gray-500 mb-3">${item.subject_id || ''} | ${item.group_name}</p>
+                    <div class="border-t pt-3 mt-auto">
+                        <div class="flex items-center text-sm text-gray-600 mb-1">
+                            <span class="mr-2">👤</span> ${item.teacher_name}
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <span class="mr-2">📍</span> ห้อง: ${item.room_name === '??????' ? 'ยังไม่ระบุ' : item.room_name}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // เมื่อเปลี่ยน Filter
+        dayFilter.addEventListener('change', (e) => renderSchedule(e.target.value));
+
+        // เริ่มต้นการแสดงผล
+        renderSchedule();
+    </script>
+</body>
+</html>
