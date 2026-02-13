@@ -1,0 +1,36 @@
+# --- Python (FastAPI) ---
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+venv/
+env/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+
+# --- Node.js (Next.js) ---
+node_modules/
+.next/
+out/
+build/
+.DS_Store
+*.pem
+
+# --- Bun ---
+bun.lockb
+.bun-build/
+
+# --- IDE & OS ---
+.vscode/
+.idea/
+.history/
+Thumbs.db
+desktop.ini
+
+# --- Database & Logs ---
+*.log
+*.sqlite
+.python-version
