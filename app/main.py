@@ -6,7 +6,7 @@ from app.api.v1 import api_router
 app = FastAPI(title="Auto Scheduler API")
 
 # ดึง URL หน้าบ้านจาก Environment Variable ถ้าไม่มีให้ใช้ localhost
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+frontend_url = os.getenv("https://schedule-app-1-a8bq-git-main-anupong-wanthas-projects.vercel.app/", "http://localhost:3000")
 
 origins = [
     "http://localhost:3000",
